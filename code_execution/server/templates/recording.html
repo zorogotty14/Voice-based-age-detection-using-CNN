@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<script>
+
+var recordButton, stopButton, recorder,audio;
+
+window.onload = function () {
+  recordButton = document.getElementById('record');
+  stopButton = document.getElementById('stop');
+  uploadButton=document.getElementById('upload');
+
+  // get audio stream from user's mic
+  navigator.mediaDevices.getUserMedia({
+    audio: true
+  })
+  .then(function (stream) {
+    recordButton.disabled = false;
+    uploadButton.disabled=true;
+    recordButton.addEventListener('click', startRecording);
+    stopButton.addEventListener('click', stopRecording);
+    recorder = new MediaRecorder(stream);
+
+    // listen to dataavailable, which gets triggered whenever we have
+    // an audio blob available
+    recorder.addEventListener('dataavailable', onRecordingReady);
+  });
+};
+
+function startRecording() {
+  recordButton.disabled = true;
+  stopButton.disabled = false;
+  uploadButton.disabled=true;
+
+  recorder.start();
+}
+
+function stopRecording() {
+  recordButton.disabled = false;
+  stopButton.disabled = true;
+  uploadButton.disabled=true;
+
+  // Stopping the recorder will eventually trigger the `dataavailable` event and we can complete the recording process
+  recorder.stop();
+}
+
+function onRecordingReady(e) {
+  audio = document.getElementById('audio');
+  uploadButton.disabled=false;
+  // e.data contains a blob representing the recording
+  audio.src = URL.createObjectURL(e.data)
+  audio.play();
+  }
+</script>
+<style>
+	body {
+    background-color: #435165;
+    margin: 0;
+}
+	#container{
+		height:50%;
+		width:30%;
+		margin-left:35%;
+		margin-top:10%;
+		border:2px solid black;
+		border-radius: 20px;
+		background-color: pink;
+	}
+	p{
+		margin-left:10%;
+	}
+	button{
+		height:30px;
+		border-radius: 4px;
+	}
+
+</style>
+<head>
+  <title> Record Your Voice</title>
+</head>
+<body>
+<form method="post">
+<div id='container'>
+  <header>
+    <p> Welcome Back {{username}} !! </p>
+    <p style="color: blue; font-size: 30px;">Record Your Voice</p>
+  </header>
+    <p><button id="record" disabled>Record Voice</button>  <button id="stop" disabled>Stop</button></p> <br>
+    <p><audio id="audio" name="audio_name" controls></audio></p>
+    <p><button type="submit" id='upload'> Upload</button></p>
+</div>
+</form>
+</body>
